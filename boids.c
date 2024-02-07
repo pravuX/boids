@@ -265,7 +265,7 @@ int main(void) {
 
   InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "boids");
 
-  SetTargetFPS(180);
+  SetTargetFPS(120);
 
   while (!WindowShouldClose()) {
 
@@ -394,8 +394,8 @@ int main(void) {
         boids[i].vy = (boids[i].vy / mag) * MAX_VELOCITY;
       }
       if (mag < MIN_VELOCITY && mag != 0.0) {
-        boids[i].vx = (boids[i].vx / mag) * MIN_VELOCITY + 1;
-        boids[i].vy = (boids[i].vy / mag) * MIN_VELOCITY + 1;
+        boids[i].vx = (boids[i].vx / mag) * MIN_VELOCITY;
+        boids[i].vy = (boids[i].vy / mag) * MIN_VELOCITY;
       }
 
       int prev_key = hash(boids[i].x, boids[i].y);
