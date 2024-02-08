@@ -1,6 +1,5 @@
 #include <math.h>
 #include <raylib.h>
-#include <raymath.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -21,21 +20,35 @@
 #define TOP_MARGIN (MARGIN)
 #define BOTTOM_MARGIN (WINDOW_HEIGHT - MARGIN)
 
-#define FLOCK_SIZE 1400
+#define FLOCK_SIZE 2000
 #define OBSTACLE_SIZE 3
 const double turn_factor = 0.2;
 const int visual_range = 80;
 const int vicinity = visual_range + 20;
 const int protected_range = 8;
 const double centering_factor = 0.0005;
-const double avoidfactor = 0.05;
+const double avoidfactor = 0.5; // faster but more chaotic
+// const double avoidfactor = 0.05; // tighter flocks but slower
+// const double avoidfactor = 0.275; // balanced
 const double matching_factor = 0.05;
 
 const int obstacle_range = 170;
-const double obstacle_turn_factor = 0.2;
+const double obstacle_turn_factor = 0.3;
 
-const Color colors[10] = {LIGHTGRAY, DARKGRAY, YELLOW, GOLD,   PINK,
-                          SKYBLUE,   BLUE,     PURPLE, VIOLET, RAYWHITE};
+const Color vicinity_color = {59, 69, 129, 255};
+
+const Color colors[10] = {
+  LIGHTGRAY,
+  DARKGRAY,
+  YELLOW,
+  GOLD,
+  PINK,
+  SKYBLUE,
+  BLUE,
+  PURPLE,
+  VIOLET,
+  RAYWHITE
+};
 
 typedef struct {
   double x;
@@ -239,7 +252,7 @@ int get_neighboring_boids(SpatialHashTable *h, Boid boid, int *neighbors) {
   int bottom = (int)b_y+vicinity/2;
   int width = right - left;
   int height = bottom - top;
-  DrawRectangleLines(left, top, width, height, MAGENTA); */
+  DrawRectangleLines(left, top, width, height, vicinity_color); */
 
   for (int x = minx; x <= maxx; x++) {
     for (int y = miny; y <= maxy; y++) {
@@ -272,8 +285,8 @@ int main(void) {
     BeginDrawing();
     ClearBackground(BLACK);
 
-    DrawRectangleLines(LEFT_MARGIN, TOP_MARGIN, RIGHT_MARGIN - MARGIN,
-                       BOTTOM_MARGIN - MARGIN, WHITE);
+    /* DrawRectangleLines(LEFT_MARGIN, TOP_MARGIN, RIGHT_MARGIN - MARGIN,
+                       BOTTOM_MARGIN - MARGIN, WHITE); */
 
     for (int i = 0; i < FLOCK_SIZE; i++) {
       DrawCircle(boids[i].x, boids[i].y, 5.0f, colors[boids[i].color]);
@@ -317,18 +330,19 @@ int main(void) {
         neighbor_index = neighbors[j];
 
         if (boids[i].id != boids[neighbor_index].id) {
-          if (boids[i].color == boids[neighbor_index].color) {
+          // Uncomment to allow flocking with similar boids
+          // if (boids[i].color == boids[neighbor_index].color) {
 
             double dx = boids[i].x - boids[neighbor_index].x;
             double dy = boids[i].y - boids[neighbor_index].y;
 
-            // if (fabs(dx) < visual_range && fabs(dy) < visual_range)
             double squared_distance = dx * dx + dy * dy;
 
             if (squared_distance < protected_range * protected_range) {
               close_dx += boids[i].x - boids[neighbor_index].x;
               close_dy += boids[i].y - boids[neighbor_index].y;
             }
+          if (boids[i].color == boids[neighbor_index].color) {
             xpos_avg += boids[neighbor_index].x;
             ypos_avg += boids[neighbor_index].y;
             xvel_avg += boids[neighbor_index].vx;
