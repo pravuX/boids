@@ -14,7 +14,7 @@ $ ./build.sh boids.c && ./boids.out
 
 ## Screenshot
 
-![Demonstration](./demo.png)
+![Demonstration](./demo.gif)
 
 ## References
 
