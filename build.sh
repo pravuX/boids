@@ -15,7 +15,7 @@ executable="./$(basename "$source_file" .c).out"
 # for generating debug symbols
 # gcc -ggdb -c "$source_file" -o "$object_file"
 gcc -c "$source_file" -o "$object_file"
-gcc -o "$executable" "$object_file" -Wall -lraylib -lm -lpthread -ldl -lrt -lX11
+gcc -o "$executable" "$object_file" -Wall -lraylib -lm -lpthread -ldl -lrt -lX11 -O3
 
 # echo "Build successful. Running $executable:"
 # ./"$executable"

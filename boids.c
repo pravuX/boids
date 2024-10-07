@@ -20,20 +20,20 @@
 #define TOP_MARGIN (MARGIN)
 #define BOTTOM_MARGIN (WINDOW_HEIGHT - MARGIN)
 
-#define FLOCK_SIZE 2000
-#define OBSTACLE_SIZE 3
-const double turn_factor = 0.2;
+#define FLOCK_SIZE 1900
+#define OBSTACLE_SIZE 5
+const float turn_factor = 0.2;
 const int visual_range = 80;
 const int vicinity = visual_range + 20;
-const int protected_range = 8;
-const double centering_factor = 0.0005;
-const double avoidfactor = 0.5; // faster but more chaotic
-// const double avoidfactor = 0.05; // tighter flocks but slower
-// const double avoidfactor = 0.275; // balanced
-const double matching_factor = 0.05;
+const int protected_range = 10;
+const float centering_factor = 0.0008;
+// const float avoidfactor = 0.5; // faster but more chaotic
+const float avoidfactor = 0.1; // tighter flocks but slower
+// const float avoidfactor = 0.275; // balanced
+const float matching_factor = 0.05;
 
 const int obstacle_range = 170;
-const double obstacle_turn_factor = 0.3;
+const float obstacle_turn_factor = 0.3;
 
 const Color vicinity_color = {59, 69, 129, 255};
 
@@ -51,10 +51,10 @@ const Color colors[10] = {
 };
 
 typedef struct {
-  double x;
-  double y;
-  double vx;
-  double vy;
+  float x;
+  float y;
+  float vx;
+  float vy;
   int id;
   int color;
 } Boid;
@@ -67,24 +67,24 @@ typedef struct {
 Boid boids[FLOCK_SIZE];
 Obstacle obstacles[OBSTACLE_SIZE];
 
-double max(double x, double y) {
+float max(float x, float y) {
   if (x > y)
     return x;
   return y;
 }
-double min(double x, double y) {
+float min(float x, float y) {
   if (x < y)
     return x;
   return y;
 }
 
-double pythagorean_addition(double x, double y) {
-  double Max = max(fabs(x), fabs(y));
-  double Min = min(fabs(x), fabs(y));
-  double a0 = 127.0 / 128.0;
-  double b0 = 3.0 / 16.0;
-  double a1 = 27.0 / 32.0;
-  double b1 = 71.0 / 128.0;
+float pythagorean_addition(float x, float y) {
+  float Max = max(fabs(x), fabs(y));
+  float Min = min(fabs(x), fabs(y));
+  float a0 = 127.0 / 128.0;
+  float b0 = 3.0 / 16.0;
+  float a1 = 27.0 / 32.0;
+  float b1 = 71.0 / 128.0;
   ;
   return max(a0 * Max + b0 * Min, a1 * Max + b1 * Min);
 }
@@ -92,10 +92,10 @@ double pythagorean_addition(double x, double y) {
 void initialize_boids() {
   for (int i = 0; i < FLOCK_SIZE; i++) {
     Boid boid;
-    boid.x = (double)(random() % WINDOW_WIDTH);
-    boid.y = (double)(random() % WINDOW_HEIGHT);
-    boid.vy = (double)(random() % (2 * MAX_VELOCITY) - MAX_VELOCITY);
-    boid.vx = (double)(random() % (2 * MAX_VELOCITY) - MAX_VELOCITY);
+    boid.x = (float)(random() % WINDOW_WIDTH);
+    boid.y = (float)(random() % WINDOW_HEIGHT);
+    boid.vy = (float)(random() % (2 * MAX_VELOCITY) - MAX_VELOCITY);
+    boid.vx = (float)(random() % (2 * MAX_VELOCITY) - MAX_VELOCITY);
     boid.id = i;
     boid.color = random() % 10;
 
@@ -126,7 +126,7 @@ typedef struct {
 
 // returns the key for the cell corresponding the
 // boid position
-int hash(double b_x, double b_y) {
+int hash(float b_x, float b_y) {
   int x = (int)(b_x / CELL_SIZE);
   int y = (int)(b_y / CELL_SIZE);
   return x + y * WINDOW_COLS;
@@ -226,7 +226,7 @@ void print_hash_table(SpatialHashTable *h) {
   }
 }
 
-double clamp(double a, double min, double max) {
+float clamp(float a, float min, float max) {
   if (a <= min)
     return min;
   if (a >= max)
@@ -235,8 +235,8 @@ double clamp(double a, double min, double max) {
 }
 
 int get_neighboring_boids(SpatialHashTable *h, Boid boid, int *neighbors) {
-  double b_x = boid.x;
-  double b_y = boid.y;
+  float b_x = boid.x;
+  float b_y = boid.y;
 
   int neighbor_count = 0;
 
@@ -289,7 +289,7 @@ int main(void) {
                        BOTTOM_MARGIN - MARGIN, WHITE); */
 
     for (int i = 0; i < FLOCK_SIZE; i++) {
-      DrawCircle(boids[i].x, boids[i].y, 5.0f, colors[boids[i].color]);
+      DrawCircle(boids[i].x, boids[i].y, 3.0f, colors[boids[i].color]);
       DrawLine(boids[i].x, boids[i].y, boids[i].x - boids[i].vx * 5,
                boids[i].y - boids[i].vy * 5, colors[boids[i].color]);
     }
@@ -306,18 +306,18 @@ int main(void) {
     EndDrawing();
 
     for (int i = 0; i < FLOCK_SIZE; i++) {
-      double xpos_avg = 0.0f;
-      double ypos_avg = 0.0f;
-      double xvel_avg = 0.0f;
-      double yvel_avg = 0.0f;
+      float xpos_avg = 0.0f;
+      float ypos_avg = 0.0f;
+      float xvel_avg = 0.0f;
+      float yvel_avg = 0.0f;
 
       int neighboring_boids = 0;
-      double close_dx = 0.0f;
-      double close_dy = 0.0f;
+      float close_dx = 0.0f;
+      float close_dy = 0.0f;
 
       int num_obstacles = 0;
-      double obstacle_dx = 0;
-      double obstacle_dy = 0;
+      float obstacle_dx = 0;
+      float obstacle_dy = 0;
 
       int neighbors[FLOCK_SIZE];
       int boids_in_vicinity_count;
@@ -333,10 +333,10 @@ int main(void) {
           // Uncomment to allow flocking with similar boids
           // if (boids[i].color == boids[neighbor_index].color) {
 
-            double dx = boids[i].x - boids[neighbor_index].x;
-            double dy = boids[i].y - boids[neighbor_index].y;
+            float dx = boids[i].x - boids[neighbor_index].x;
+            float dy = boids[i].y - boids[neighbor_index].y;
 
-            double squared_distance = dx * dx + dy * dy;
+            float squared_distance = dx * dx + dy * dy;
 
             if (squared_distance < protected_range * protected_range) {
               close_dx += boids[i].x - boids[neighbor_index].x;
@@ -366,13 +366,13 @@ int main(void) {
       boids[i].vy += close_dy * avoidfactor;
 
       for (int j = 0; j < OBSTACLE_SIZE; j++) {
-        double dx = boids[i].x - (double)obstacles[j].x;
-        double dy = boids[i].y - (double)obstacles[j].y;
+        float dx = boids[i].x - (float)obstacles[j].x;
+        float dy = boids[i].y - (float)obstacles[j].y;
         if (fabs(dx) < obstacle_range && fabs(dy) < obstacle_range) {
-          double squared_distance = dx * dx + dy * dy;
+          float squared_distance = dx * dx + dy * dy;
           if (squared_distance < obstacle_range * obstacle_range) {
-            obstacle_dx += boids[i].x - (double)obstacles[j].x;
-            obstacle_dy += boids[i].y - (double)obstacles[j].y;
+            obstacle_dx += boids[i].x - (float)obstacles[j].x;
+            obstacle_dy += boids[i].y - (float)obstacles[j].y;
             num_obstacles += 1;
           }
         }
@@ -402,7 +402,7 @@ int main(void) {
         boids[i].vy -= turn_factor;
       }
 
-      double mag = pythagorean_addition(boids[i].vx, boids[i].vy);
+      float mag = pythagorean_addition(boids[i].vx, boids[i].vy);
       if (mag > MAX_VELOCITY) {
         boids[i].vx = (boids[i].vx / mag) * MAX_VELOCITY;
         boids[i].vy = (boids[i].vy / mag) * MAX_VELOCITY;
